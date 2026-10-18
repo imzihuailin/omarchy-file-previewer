@@ -1,27 +1,37 @@
 # Omarchy File Previewer
 
-让 Nautilus 的图片空格预览和双击打开共用系统已有的 **imv**。
+English | [简体中文](README.zh-CN.md)
 
-- 图片窗口默认居中浮动，打开后立即获取键盘焦点，鼠标移出窗口时保持焦点。
-- 鼠标移到左右屏幕边缘时，仍可正常唤出 `omarchy-side-panel`；悬停侧边栏不影响图片快捷键。主动点击其他窗口时正常切换焦点。
-- 单张打开时，自动载入同目录图片，按文件名自然排序（`1`、`2`、`10`）。多选打开时只浏览选中的图片。
-- 文本、PDF、视频等非图片文件继续使用原有的 Sushi 空格预览。
-- 保留现有 imv 配置；本插件的按键覆盖只用于经插件打开的窗口。
+[Demo video](preview.mp4)
 
-| 按键 | 功能 |
+Use the same **imv** image viewer for Nautilus Space previews and double-clicks, with keyboard navigation and focus that stays put while the pointer moves.
+
+## Requirements
+
+- Omarchy with Hyprland 0.56 and its Lua configuration, Nautilus 50, Sushi 50, and imv 5.
+- `python-gobject`, `gjs`, and `desktop-file-utils`, normally included in Omarchy.
+
+## Interaction
+
+- Select an image in Nautilus and press `Space`, or double-click it, to open imv.
+- The image window opens centered and floating, takes keyboard focus immediately, and keeps it when the pointer moves outside the window.
+- Move the pointer to either screen edge to reveal `omarchy-side-panel`. Hovering over the panel leaves image shortcuts working; clicking another window switches focus normally.
+- Opening one image loads the other images in its directory in natural filename order (`1`, `2`, `10`). Opening multiple selected images limits navigation to that selection.
+- Text, PDF, video, and other non-image files continue using Sushi for Space previews.
+- Existing imv configuration is preserved. These key overrides apply only to windows opened through this project.
+
+| Key | Action |
 | --- | --- |
-| `j` / `k` | 下一张 / 上一张图片 |
-| `h` / `l` | 已停用，不移动图片 |
-| `-` / `=` | 缩小 / 放大图片 |
-| `0` | 恢复 1:1 原始大小 |
-| `↑` `↓` `←` `→` | 在屏幕上移动窗口，每次 40 像素 |
-| `Esc` / `q` | 关闭图片窗口 |
+| `j` / `k` | Next / previous image |
+| `h` / `l` | Disabled; do not pan the image |
+| `-` / `=` | Zoom out / in |
+| `0` | Actual size, 1:1 |
+| `↑` `↓` `←` `→` | Move the window by 40 pixels |
+| `Esc` / `q` | Close the image window |
 
-## 安装
+## Install
 
-适用于使用 Lua 配置的 Hyprland 0.56、Nautilus 50、Sushi 50 和 imv 5。还需要 `python-gobject`、`gjs`、`desktop-file-utils`，Omarchy 通常已经包含这些依赖。
-
-克隆仓库并安装：
+Clone the repository and run the installer:
 
 ```bash
 git clone https://github.com/manateelazycat/omarchy-file-previewer.git
@@ -29,36 +39,38 @@ cd omarchy-file-previewer
 python install.py
 ```
 
-保持此目录路径不变，两个用户级入口会引用这里的代码：
+Keep the repository at the same path after installation. Two user-level entry points refer to its code:
 
 - `~/.local/share/applications/imv.desktop`
 - `~/.local/share/dbus-1/services/org.gnome.NautilusPreviewer.service`
 
-默认图片应用的 ID 仍是 `imv.desktop`。安装器会备份原有入口到 `~/.local/state/omarchy-file-previewer/install.json`，可以重复运行。无需修改系统文件、全局鼠标行为或 Hyprland 用户配置，也无需重启文件管理器。
+The default image application ID remains `imv.desktop`. The installer backs up existing entries to `~/.local/state/omarchy-file-previewer/install.json` and can be run again. It does not edit system files, global mouse settings, or Hyprland user configuration files, and Nautilus does not need to restart.
 
-如果安装时旧 Sushi 服务已经运行，它会在原有预览窗口关闭、服务闲置退出后使用新入口。网络 URI 的预览继续交给 Sushi，本插件的目录切图针对本地图片。
+If the original Sushi service is already running, the new entry takes effect after its preview closes and the idle service exits. Network URI previews remain with Sushi; directory navigation targets local images.
 
-## 卸载
+## Remove
 
 ```bash
 python install.py --uninstall
 ```
 
-恢复安装前的入口。安装后被用户手动编辑过的文件会保留，并输出对应路径。
+This restores the previous entry points. Files edited manually after installation are preserved, with their paths printed for review.
 
-## 验证
+## Development
 
 ```bash
 python -m unittest discover -s tests -p 'test_*.py'
 python tests/nested.py
 ```
 
-集成测试需要 Weston、`wtype`、`grim`、C 编译器和 Wayland 开发头文件。如果 Weston 解包在临时目录中，可用 `WESTON_PREFIX=/path/to/unpacked/usr python tests/nested.py`。
+Integration tests require Weston, `wtype`, `grim`, a C compiler, and Wayland development headers. For an unpacked Weston installation, use `WESTON_PREFIX=/path/to/unpacked/usr python tests/nested.py`.
 
-测试在无界面的 Weston 中嵌套 Hyprland，创建专用虚拟输出，并使用独立的 Wayland socket、D-Bus、配置、缓存和数据目录。实际操作 Nautilus 的空格和双击，验证切图、缩放、焦点、窗口移动、非图片预览及卸载恢复。检测到 `~/omarchy-side-panel` 时，还会加载其真实侧边栏组件，验证预览期间的左右边缘触发、键盘焦点和主动窗口切换；可用 `SIDE_PANEL_SOURCE` 指定其他源码路径。不会向当前桌面发送测试输入。截图和日志保存在忽略版本管理的 `test-results/`。
+Tests run Hyprland nested inside a headless Weston, with a dedicated virtual output and isolated Wayland socket, D-Bus, configuration, cache, and data directories. They exercise actual Nautilus Space and double-click input, image navigation, zoom, focus, window movement, non-image previews, and uninstall recovery.
 
-焦点和移动规则使用当前 [Hyprland 窗口规则](https://wiki.hypr.land/Configuring/Basics/Window-Rules/) 和 [Lua dispatcher](https://wiki.hypr.land/configuring/core/dispatchers/) 接口。窗口布局仅匹配插件专用的 imv app ID；悬停焦点保护仅在图片窗口获取焦点时启用，切换或关闭后恢复原有规则，不修改全局输入设置。
+When `~/omarchy-side-panel` exists, the tests also load its real dock components and verify both screen edges, keyboard focus, and explicit window switching during previews. Set `SIDE_PANEL_SOURCE` to use a different source directory. No test input reaches the current desktop. Screenshots and logs are stored in the ignored `test-results/` directory.
 
-## 许可证
+Focus and movement use [Hyprland window rules](https://wiki.hypr.land/Configuring/Basics/Window-Rules/) and [Lua dispatchers](https://wiki.hypr.land/configuring/core/dispatchers/). Window layout rules match the dedicated imv app ID. Hover focus protection is enabled only while an image window is active, and previous rules resume when focus switches or the window closes.
 
-GPL-3.0-only，见 [LICENSE](LICENSE)。
+## License
+
+Omarchy File Previewer is licensed under the GNU General Public License version 3.0 only (`GPL-3.0-only`). See [LICENSE](LICENSE).
