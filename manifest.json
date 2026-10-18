@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "id": "io.github.manateelazycat.file-previewer",
+  "name": "Omarchy File Previewer",
+  "version": "0.1.0",
+  "author": "Andy Stewart",
+  "license": "GPL-3.0-only",
+  "repository": "https://github.com/manateelazycat/omarchy-file-previewer",
+  "description": "Use imv for Nautilus Space previews and double-clicks, with keyboard image navigation, zoom, window movement and persistent keyboard focus.",
+  "kinds": ["service"],
+  "keepLoaded": true,
+  "entryPoints": {
+    "service": "Service.qml"
+  }
+}

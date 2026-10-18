@@ -10,6 +10,7 @@ https://github.com/user-attachments/assets/a7b1f2da-a173-4cde-a321-61574c0c9bbf
 
 - Omarchy，及其 Hyprland 0.56 Lua 配置、Nautilus 50、Sushi 50 和 imv 5。
 - `python-gobject`、`gjs` 和 `desktop-file-utils`，Omarchy 通常已经包含这些依赖。
+- Omarchy service 入口使用系统内置的 Quickshell。
 
 ## 交互
 
@@ -31,7 +32,16 @@ https://github.com/user-attachments/assets/a7b1f2da-a173-4cde-a321-61574c0c9bbf
 
 ## 安装
 
-克隆仓库并安装：
+安装并启用插件，再明确安装 Nautilus 和 imv 集成：
+
+```bash
+omarchy plugin add https://github.com/manateelazycat/omarchy-file-previewer.git --enable --yes
+python ~/.config/omarchy/plugins/io.github.manateelazycat.file-previewer/install.py
+```
+
+第二条命令是必需的手动设置。service 会在 Hyprland 配置重载后恢复预览焦点规则；仅启用插件不会自动修改应用关联或桌面入口。
+
+如果不使用 Omarchy service，也可以单独克隆仓库并运行同一个安装器：
 
 ```bash
 git clone https://github.com/manateelazycat/omarchy-file-previewer.git
@@ -50,6 +60,15 @@ python install.py
 
 ## 卸载
 
+通过 Omarchy 安装时，先恢复应用入口，再移除插件：
+
+```bash
+python ~/.config/omarchy/plugins/io.github.manateelazycat.file-previewer/install.py --uninstall
+omarchy plugin remove io.github.manateelazycat.file-previewer --yes
+```
+
+单独安装时，在原仓库目录运行：
+
 ```bash
 python install.py --uninstall
 ```
@@ -59,13 +78,14 @@ python install.py --uninstall
 ## 开发
 
 ```bash
+omarchy plugin validate .
 python -m unittest discover -s tests -p 'test_*.py'
 python tests/nested.py
 ```
 
 集成测试需要 Weston、`wtype`、`grim`、C 编译器和 Wayland 开发头文件。如果 Weston 解包在临时目录中，可用 `WESTON_PREFIX=/path/to/unpacked/usr python tests/nested.py`。
 
-测试在无界面的 Weston 中嵌套 Hyprland，创建专用虚拟输出，并使用独立的 Wayland socket、D-Bus、配置、缓存和数据目录。实际操作 Nautilus 的空格和双击，验证切图、缩放、焦点、窗口移动、非图片预览及卸载恢复。
+测试在无界面的 Weston 中嵌套 Hyprland，创建专用虚拟输出，并使用独立的 Wayland socket、D-Bus、配置、缓存和数据目录。验证 service 加载及配置重载后的恢复，再实际操作 Nautilus 的空格和双击，验证切图、缩放、焦点、窗口移动、非图片预览及卸载恢复。
 
 检测到 `~/omarchy-side-panel` 时，还会加载其真实侧边栏组件，验证预览期间的左右边缘触发、键盘焦点和主动窗口切换；可用 `SIDE_PANEL_SOURCE` 指定其他源码路径。不会向当前桌面发送测试输入。截图和日志保存在忽略版本管理的 `test-results/`。
 

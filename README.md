@@ -10,6 +10,7 @@ Use the same **imv** image viewer for Nautilus Space previews and double-clicks,
 
 - Omarchy with Hyprland 0.56 and its Lua configuration, Nautilus 50, Sushi 50, and imv 5.
 - `python-gobject`, `gjs`, and `desktop-file-utils`, normally included in Omarchy.
+- The Omarchy service also uses the built-in Quickshell runtime.
 
 ## Interaction
 
@@ -31,7 +32,16 @@ Use the same **imv** image viewer for Nautilus Space previews and double-clicks,
 
 ## Install
 
-Clone the repository and run the installer:
+Install and enable the plugin, then explicitly install the Nautilus and imv integration:
+
+```bash
+omarchy plugin add https://github.com/manateelazycat/omarchy-file-previewer.git --enable --yes
+python ~/.config/omarchy/plugins/io.github.manateelazycat.file-previewer/install.py
+```
+
+The second command is required manual setup. The service keeps the preview focus rules available across Hyprland configuration reloads; enabling it does not automatically change application associations or desktop entries.
+
+For a standalone installation without the Omarchy service, clone the repository and run the same installer:
 
 ```bash
 git clone https://github.com/manateelazycat/omarchy-file-previewer.git
@@ -50,6 +60,15 @@ If the original Sushi service is already running, the new entry takes effect aft
 
 ## Remove
 
+For an Omarchy plugin installation, restore the application entries before removing the plugin:
+
+```bash
+python ~/.config/omarchy/plugins/io.github.manateelazycat.file-previewer/install.py --uninstall
+omarchy plugin remove io.github.manateelazycat.file-previewer --yes
+```
+
+For a standalone installation, run this from the original checkout:
+
 ```bash
 python install.py --uninstall
 ```
@@ -59,13 +78,14 @@ This restores the previous entry points. Files edited manually after installatio
 ## Development
 
 ```bash
+omarchy plugin validate .
 python -m unittest discover -s tests -p 'test_*.py'
 python tests/nested.py
 ```
 
 Integration tests require Weston, `wtype`, `grim`, a C compiler, and Wayland development headers. For an unpacked Weston installation, use `WESTON_PREFIX=/path/to/unpacked/usr python tests/nested.py`.
 
-Tests run Hyprland nested inside a headless Weston, with a dedicated virtual output and isolated Wayland socket, D-Bus, configuration, cache, and data directories. They exercise actual Nautilus Space and double-click input, image navigation, zoom, focus, window movement, non-image previews, and uninstall recovery.
+Tests run Hyprland nested inside a headless Weston, with a dedicated virtual output and isolated Wayland socket, D-Bus, configuration, cache, and data directories. They verify service loading and recovery after a configuration reload, actual Nautilus Space and double-click input, image navigation, zoom, focus, window movement, non-image previews, and uninstall recovery.
 
 When `~/omarchy-side-panel` exists, the tests also load its real dock components and verify both screen edges, keyboard focus, and explicit window switching during previews. Set `SIDE_PANEL_SOURCE` to use a different source directory. No test input reaches the current desktop. Screenshots and logs are stored in the ignored `test-results/` directory.
 

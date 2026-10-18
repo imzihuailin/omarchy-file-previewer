@@ -80,6 +80,30 @@ def inside():
         Path(os.environ["FPV_HOST_RUNTIME"]) / os.environ.get("FPV_HOST_DISPLAY", ""))
     ctl("reload")
     assert not ctl("configerrors").strip(), ctl("configerrors")
+    service_config = runtime / "service"
+    service_config.mkdir()
+    for name in ("Service.qml", "hyprland.lua"):
+        shutil.copy2(ROOT / name, service_config / name)
+    shutil.copy2(ROOT / "tests/service.qml", service_config / "shell.qml")
+    service_log = (RESULTS / "service.log").open("w")
+    service = subprocess.Popen(["quickshell", "-p", str(service_config), "--no-color"],
+                               stdout=service_log, stderr=service_log)
+
+    def service_ready():
+        if service.poll() is not None:
+            raise AssertionError((RESULTS / "service.log").read_text())
+        try:
+            status = json.loads(run(["quickshell", "-p", str(service_config), "ipc", "call",
+                APP_ID, "status"]))
+            return status["rulesApplied"]
+        except (subprocess.CalledProcessError, json.JSONDecodeError):
+            return False
+
+    wait_for("Omarchy service applies focus rules", service_ready)
+    ctl("reload")
+    wait_for("Omarchy service restores rules after reload", lambda:
+        service_ready() and ctl("repl", "type(_G.omarchy_file_previewer)").strip() == "table")
+    print("PASS: Omarchy service entry loads and restores rules after config reload", flush=True)
     run([sys.executable, str(ROOT / "install.py")])
     run([sys.executable, str(ROOT / "install.py")])  # idempotent
     # Reproduce an already-installed first version, so updating a running
