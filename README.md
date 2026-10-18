@@ -2,7 +2,7 @@
 
 English | [简体中文](README.zh-CN.md)
 
-[Demo video](preview.mp4)
+https://github.com/user-attachments/assets/a7b1f2da-a173-4cde-a321-61574c0c9bbf
 
 Use the same **imv** image viewer for Nautilus Space previews and double-clicks, with keyboard navigation and focus that stays put while the pointer moves.
 

@@ -2,7 +2,7 @@
 
 简体中文 | [English](README.md)
 
-[演示视频](preview.mp4)
+https://github.com/user-attachments/assets/a7b1f2da-a173-4cde-a321-61574c0c9bbf
 
 让 Nautilus 的图片空格预览和双击打开共用 **imv**，支持键盘操作，并在鼠标移动时保持键盘焦点。
 
